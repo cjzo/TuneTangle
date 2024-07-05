@@ -36,3 +36,44 @@
     transform: rotate(360deg);
   }
 }
+
+.alt-button {
+  background-color: transparent !important;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  transition: background-color 0.3s, border 0.3s, color 0.3s;
+  text-shadow: 2px 2px 4px #282c34;
+}
+
+.alt-button:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border: 2px solid rgba(255, 255, 255, 0);
+}
+
+.text-shadow {
+  text-shadow: 2px 2px 4px #282c34;
+}
+
+.SearchContainer {
+  display: flex;
+  align-items: center;
+}
+
+.SearchContainer input {
+  padding-right: 2.5rem;
+  transition: background-color 0.5s, color 0.3s, width 0.15s ease-in-out;
+  border: none;
+  width: 0px;
+}
+
+.SearchContainer input:focus {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  width: 250px;
+}
