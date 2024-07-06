@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box,
+    Button,
     Stack,
     VStack,
     Heading,
     Text
 } from "@chakra-ui/react";
 import { motion } from 'framer-motion';
+import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
 
@@ -94,6 +96,9 @@ function LoggedInHome() {
                                 data-aos="fade-up"
                                 data-aos-delay="200"
                             >
+                            <Button as={Link} to="/recommendations" className="main-button" size="lg" height="4rem" px="2rem">
+                                <Text>Discover Your Music</Text>
+                            </Button>
                             </Stack>
                         </VStack>
 
