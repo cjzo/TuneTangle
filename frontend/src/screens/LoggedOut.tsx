@@ -74,6 +74,7 @@ function LoggedInHome() {
                                 mt={5}
                                 mb={1}
                                 className="text-shadow"
+                                minHeight={["60px", "80px", "100px"]}
                             >
                                 You have been logged out.
                             </Text>

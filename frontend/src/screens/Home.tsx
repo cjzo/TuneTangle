@@ -75,6 +75,7 @@ function Home() {
                 mt={5}
                 mb={1}
                 className="text-shadow"
+                minHeight={["60px", "80px", "100px"]}
               >
                 Unleash a universe of fresh beats, tracks, and trends. Using
                 your favorite tunes to guide us, Sound Search unearths hidden
