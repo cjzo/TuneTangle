@@ -130,3 +130,25 @@
   box-shadow: none !important;
   outline: none !important;
 }
+
+.custom-card {
+  width: 300px;
+  background: transparent !important;
+  box-shadow: 0 0 14px 0 rgba(0, 0, 0, 0.4) !important;
+  transition: 0.3s;
+  border-radius: 10px;
+  margin: 10px;
+}
+
+.custom-card:hover {
+  box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.4) !important;
+}
+
+.custom-card .chakra-card__body {
+  padding: 20px;
+}
+
+.custom-card .chakra-card__footer {
+  text-align: center;
+  padding: 10px;
+}

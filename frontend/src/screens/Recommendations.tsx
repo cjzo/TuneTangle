@@ -142,13 +142,13 @@ const Recommendations = () => {
                                 Get Recommendations
                             </Button>
                             {error && <Text color="red.500">{error}</Text>}
-                            <Box className="results" mt={5}>
+                            <Box className="results" mt={5} textAlign="center">
                                 {loading ? (
                                     <Spinner size="xl" />
                                 ) : (
-                                    <Stack spacing={4}>
+                                    <Stack spacing={4} direction="column" align="center">
                                         {results.map((result, index) => (
-                                            <Card key={index} borderWidth="1px" borderRadius="lg" overflow="hidden" p={4}>
+                                            <Card className="custom-card" key={index} borderWidth="0px" borderRadius="lg" overflow="hidden" p={4}>
                                                 {result.error ? (
                                                     <Text color="red.500">{result.track}: {result.error}</Text>
                                                 ) : (
