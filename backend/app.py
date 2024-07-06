@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 import requests, base64
 from tikapi import TikAPI, ValidationException, ResponseException
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app, origins="*")
 
 api_key = "7vOXGqdh1XKBfTblPXFnfENarTsjh4hA3ZUaVFVdwj6dX5gH"
 api = TikAPI(api_key)
@@ -17,7 +20,8 @@ def get_token():
 
     token_url = "https://accounts.spotify.com/api/token"
     token_headers = {
-        "Authorization": f"Basic {client_creds_b64.decode()}"
+        "Authorization": f"Basic {client_creds_b64.decode()}",
+        "Content-Type": "application/x-www-form-urlencoded"
     }
     token_data = {
         "grant_type": "client_credentials"
@@ -26,11 +30,6 @@ def get_token():
     r = requests.post(token_url, data=token_data, headers=token_headers)
     token_response_data = r.json()
     return token_response_data['access_token']
-
-## I think something to consider is whether or not we're using the User's playlists.
-## Right now, we're just using the Spotify API to get recommendations based on a song query (I could be wrong though).
-## We have the user's Auth token in local storage, do we want to use that to get their playlists and then get recommendations based on that?
-## Or do we want to keep it as is?
 
 @app.route('/recommendations', methods=['POST'])
 def recommendations():
@@ -43,7 +42,7 @@ def recommendations():
     # Find track ID
     search_url = "https://api.spotify.com/v1/search"
     search_headers = {
-    "Authorization": f"Bearer {access_token}"
+        "Authorization": f"Bearer {access_token}"
     }
     search_params = {
         "q": song_query,
@@ -71,8 +70,7 @@ def recommendations():
     # Get recommendations
     recommendations_url = "https://api.spotify.com/v1/recommendations"
 
-    # recommendation headers seemed the same as search headers
-
+    # Recommendation headers seemed the same as search headers
     recommendations_params = {
         "seed_tracks": track_id,
         "limit": 10,
@@ -106,21 +104,34 @@ def recommendations():
 
         changeable = response.json()
 
-        try:
-            video_id = changeable["item_list"][0]["video"]["id"]
-            video_response = api.public.video(id=video_id)
-            json_data = video_response.json()
+        # Check if 'item_list' key exists
+        if "item_list" in changeable and changeable["item_list"]:
+            try:
+                video_id = changeable["item_list"][0]["video"]["id"]
+                video_response = api.public.video(id=video_id)
+                json_data = video_response.json()
+
+                tt_author = json_data['itemInfo']['itemStruct']['author']['uniqueId']
+                tt_video = json_data['itemInfo']['itemStruct']['id']
+                link = f"https://www.tiktok.com/@{tt_author}/video/{tt_video}"
+
+                video_list.append({
+                    'track': info,
+                    'video': link
+                })
+
+            except (ValidationException, ResponseException) as e:
+                video_list.append({
+                    'track': info,
+                    'error': str(e)
+                })
+        else:
             video_list.append({
                 'track': info,
-                'video': json_data['itemInfo']['itemStruct']['video']['downloadAddr']
-            })
-        except (ValidationException, ResponseException) as e:
-            video_list.append({
-                'track': info,
-                'error': str(e)
+                'error': 'No TikTok video found'
             })
 
     return jsonify(video_list)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=8000, debug=True)

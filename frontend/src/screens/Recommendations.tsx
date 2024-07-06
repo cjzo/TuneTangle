@@ -7,17 +7,27 @@ import {
     Heading,
     Text,
     Input,
-    Image
+    Card,
+    CardBody,
+    CardFooter,
+    Spinner,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
 import { motion } from 'framer-motion';
 import '../App.css';
+
+interface Result {
+    track: string;
+    video?: string;
+    error?: string;
+}
 
 const Recommendations = () => {
     const [cursorPosition, setCursorPosition] = useState({ x: -100, y: -100 });
     const [songQuery, setSongQuery] = useState('');
-    const [results, setResults] = useState([]);
+    const [results, setResults] = useState<Result[]>([]);
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [embeds, setEmbeds] = useState<{ [key: number]: string }>({});
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -36,8 +46,7 @@ const Recommendations = () => {
     };
 
     const getRecommendations = async () => {
-        const accessToken = localStorage.getItem('spotify_access_token');
-        
+        setLoading(true);
         try {
             const response = await fetch('/recommendations', {
                 method: 'POST',
@@ -45,8 +54,7 @@ const Recommendations = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    song_query: songQuery,
-                    access_token: accessToken
+                    song_query: songQuery
                 })
             });
 
@@ -58,12 +66,37 @@ const Recommendations = () => {
             } else {
                 setError('');
                 setResults(data);
+                fetchEmbeds(data);
             }
         } catch (err) {
             setError('An error occurred while fetching recommendations.');
             setResults([]);
+        } finally {
+            setLoading(false);
         }
     };
+
+    const fetchEmbeds = async (results: Result[]) => {
+        const newEmbeds: { [key: number]: string } = {};
+        await Promise.all(results.map(async (result, index) => {
+            if (result.video) {
+                const response = await fetch(`https://www.tiktok.com/oembed?url=${result.video}`);
+                const data = await response.json();
+                newEmbeds[index] = data.html;
+            }
+        }));
+        setEmbeds(newEmbeds);
+    };
+
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://www.tiktok.com/embed.js';
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, [embeds]);
 
     return (
         <Box display="flex" flexDirection="column" minHeight="90vh" overflow="hidden">
@@ -110,11 +143,34 @@ const Recommendations = () => {
                             </Button>
                             {error && <Text color="red.500">{error}</Text>}
                             <Box className="results" mt={5}>
-                                <ul>
-                                    {results.map((track, index) => (
-                                        <li key={index}>{track}</li>
-                                    ))}
-                                </ul>
+                                {loading ? (
+                                    <Spinner size="xl" />
+                                ) : (
+                                    <Stack spacing={4}>
+                                        {results.map((result, index) => (
+                                            <Card key={index} borderWidth="1px" borderRadius="lg" overflow="hidden" p={4}>
+                                                {result.error ? (
+                                                    <Text color="red.500">{result.track}: {result.error}</Text>
+                                                ) : (
+                                                    <>
+                                                        <CardBody>
+                                                            {embeds[index] ? (
+                                                                <Box
+                                                                    dangerouslySetInnerHTML={{ __html: embeds[index] }}
+                                                                />
+                                                            ) : (
+                                                                <Spinner />
+                                                            )}
+                                                        </CardBody>
+                                                        <CardFooter>
+                                                            <Text as="span" fontWeight="bold">{result.track}</Text>
+                                                        </CardFooter>
+                                                    </>
+                                                )}
+                                            </Card>
+                                        ))}
+                                    </Stack>
+                                )}
                             </Box>
                         </VStack>
                         <Box maxW="1200px" pos="absolute" zIndex={-1} top={450}>
