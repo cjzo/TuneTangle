@@ -22,6 +22,8 @@ import Callback from './screens/Callback';
 
 import LoggedInHome from './screens/LoggedInHome';
 import LoggedOut from './screens/LoggedOut';
+import Recommendations from './screens/Recommendations';
+
 import LoginButton from './Login';
 
 const App: React.FC = () => {
@@ -74,6 +76,7 @@ const App: React.FC = () => {
           <Route path="/callback" element={<Callback />} />
           <Route path="/loggedinhome" element={<LoggedInHome />} />
           <Route path="/logout" element={<LoggedOut />} />
+          <Route path="/recommendations" element={<Recommendations />} />
         </Routes>
       </Box>
     </Box>
