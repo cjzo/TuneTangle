@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box,
-    Button,
-    Stack,
-    VStack,
-    Heading,
-    Text,
-    Image
-  } from "@chakra-ui/react";
+  Box,
+  Button,
+  Stack,
+  VStack,
+  Heading,
+  Text,
+  Image
+} from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { motion } from 'framer-motion';
 import Spotify from '../media/spotify.png';
+
+import { getSpotifyAuthUrl } from '../auth/spotify-auth';
+
 import '../App.css';
 
 function Home() {
+  const handleSpotifyLogin = () => {
+    window.location.href = getSpotifyAuthUrl();
+  };
+
   const [cursorPosition, setCursorPosition] = useState({ x: -100, y: -100 });
 
   useEffect(() => {
@@ -90,7 +97,7 @@ function Home() {
                 data-aos="fade-up"
                 data-aos-delay="200"
               >
-                <Button as={Link} to="/login" className="alt-button" size="lg" height="4rem" px="2rem">
+                <Button as={Link} onClick={handleSpotifyLogin} to="/loggedinhome" className="alt-button" size="lg" height="4rem" px="2rem">
                   <Box pr={4}>
                     <Image
                       src={Spotify}

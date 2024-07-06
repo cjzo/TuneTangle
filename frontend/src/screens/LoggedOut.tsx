@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box,
+    Button,
     Stack,
     VStack,
     Heading,
-    Text
+    Text,
+    Image
 } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import { motion } from 'framer-motion';
+import Spotify from '../media/spotify.png';
 import '../App.css';
+
+import { getSpotifyAuthUrl } from '../auth/spotify-auth';
+
 function LoggedInHome() {
+    const handleSpotifyLogin = () => {
+        window.location.href = getSpotifyAuthUrl();
+    };
+
     const [cursorPosition, setCursorPosition] = useState({ x: -100, y: -100 });
 
     useEffect(() => {
@@ -64,7 +75,7 @@ function LoggedInHome() {
                                 mb={1}
                                 className="text-shadow"
                             >
-                                You've now logged in.
+                                You have been logged out.
                             </Text>
                             <Text
                                 fontSize={["lg", "2xl"]}
@@ -83,6 +94,15 @@ function LoggedInHome() {
                                 data-aos="fade-up"
                                 data-aos-delay="200"
                             >
+                                <Button as={Link} onClick={handleSpotifyLogin} to="/loggedinhome" className="alt-button" size="lg" height="4rem" px="2rem">
+                                    <Box pr={4}>
+                                        <Image
+                                            src={Spotify}
+                                            height="25px"
+                                        />
+                                    </Box>
+                                    <Text>Connect to Spotify</Text>
+                                </Button>
                             </Stack>
                         </VStack>
 
