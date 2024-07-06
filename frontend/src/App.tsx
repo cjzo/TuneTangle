@@ -64,9 +64,6 @@ const App: React.FC = () => {
           </Box>
           <ButtonGroup spacing={5}>
             <LoginButton></LoginButton>
-            <Button as={Link} onClick={handleLogout} className="alt-button" to="/logout">
-              Logout
-            </Button>
           </ButtonGroup>
         </HStack>
       </Flex>

@@ -7,9 +7,18 @@ import {
     Text
 } from "@chakra-ui/react";
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import '../App.css';
 function LoggedInHome() {
     const [cursorPosition, setCursorPosition] = useState({ x: -100, y: -100 });
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('spotify_access_token');
+        if (!token) {
+            navigate('/');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {

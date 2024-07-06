@@ -15,8 +15,6 @@ const Callback: React.FC = () => {
         if (token) {
             localStorage.setItem('spotify_access_token', token);
             navigate('/loggedinhome');
-        } else {
-            navigate('/');
         }
     }, [navigate]);
 
