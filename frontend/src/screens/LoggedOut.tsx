@@ -35,8 +35,8 @@ function LoggedInHome() {
     }, []);
 
     return (
-        <Box>
-            <Box as="section" overflow="hidden" p={4} pos="relative">
+        <Box display="flex" flexDirection="column" minHeight="90vh" overflow="hidden">
+            <Box as="section" flex="1" overflow="hidden" p={4} pos="relative" display="flex" flexDirection="column">
                 <motion.div
                     style={{
                         position: 'fixed',
@@ -51,7 +51,7 @@ function LoggedInHome() {
                         pointerEvents: 'none',
                     }}
                 />
-                <Stack mx="auto" py="5" pos="relative" pb="40" px={[4, 0]}>
+                <Stack mx="auto" py="5" pos="relative" pb="40" px={[4, 0]} flex="1" justify="center">
                     <VStack mb="20" spacing={20} alignItems="center">
                         <VStack spacing="6" w="full">
                             <Heading
@@ -95,7 +95,7 @@ function LoggedInHome() {
                                 data-aos="fade-up"
                                 data-aos-delay="200"
                             >
-                                <Button as={Link} onClick={handleSpotifyLogin} to="/loggedinhome" className="alt-button" size="lg" height="4rem" px="2rem">
+                                <Button as={Link} onClick={handleSpotifyLogin} to="/loggedinhome" className="main-button" size="lg" height="4rem" px="2rem">
                                     <Box pr={4}>
                                         <Image
                                             src={Spotify}
@@ -147,6 +147,8 @@ function LoggedInHome() {
                 textAlign="center"
                 borderTop="1px solid gray"
                 color="gray.500"
+                height="50px"
+                flexShrink="0"
             >
                 &copy; 2024 TTRP
             </Box>
