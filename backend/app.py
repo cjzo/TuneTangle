@@ -125,6 +125,11 @@ def recommendations():
                     'track': info,
                     'error': str(e)
                 })
+        elif "message" in changeable:
+            video_list.append({
+                'track': info,
+                'error': changeable["message"]
+            })
         else:
             video_list.append({
                 'track': info,
