@@ -4,7 +4,7 @@ const CLIENT_ID = '5771d5d776964495b21177378f72c035';
 const REDIRECT_URI = 'http://localhost:3000/callback';
 
 const RESPONSE_TYPE = 'token';
-const SCOPES = ['playlist-read-private'];
+const SCOPES = ['playlist-read-private', 'user-read-private'];
 
 export const getSpotifyAuthUrl = (): string => {
   const scope = encodeURIComponent(SCOPES.join(' '));

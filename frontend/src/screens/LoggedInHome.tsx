@@ -83,7 +83,7 @@ function LoggedInHome() {
                                 className="text-shadow"
                                 minHeight={["60px", "80px", "100px"]}
                             >
-                                Welcome, { username }!
+                                Welcome, you have been logged in!
                             </Text>
                             <Text
                                 fontSize={["lg", "2xl"]}
