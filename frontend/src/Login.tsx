@@ -22,6 +22,26 @@ const LoginButton: React.FC = () => {
         setIsLoggedIn(false);
     };
 
+    async function fetchProfile(token: string): Promise<any> {
+        const result = await fetch("https://api.spotify.com/v1/me", {
+            method: "GET", headers: { Authorization: `Bearer ${token}` }
+        });
+        return await result.json();
+    }
+
+    const token = localStorage.getItem('access_token')
+
+    if (token) {
+        fetchProfile(token)
+            .then(profile => {
+                const username = profile.display_name;
+                localStorage.setItem('user_name', username);
+            })
+            .catch(error => {
+                console.error("Error fetching profile:", error);
+            });
+    }
+
     return (
         isLoggedIn ? (
             <Button as={Link} onClick={handleLogout} className="alt-button" to="/logout">

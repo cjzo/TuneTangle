@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Link as ChakraLink,
   Box,
-  Button,
   ButtonGroup,
   Image,
   HStack,
@@ -27,9 +26,6 @@ import Recommendations from './screens/Recommendations';
 import LoginButton from './Login';
 
 const App: React.FC = () => {
-  const handleLogout = () => {
-    localStorage.removeItem('spotify_access_token');
-  };
 
   return (
     <Box className="App">
