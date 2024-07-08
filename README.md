@@ -1,7 +1,21 @@
 ## TuneTangle
 Want to break out of the monotonous loop of music that you can't seem to escape? Look no further! **TuneTangle gives you a curated playlist based on your existing taste to spice your music life up!**
 
-
+## Setup
+`
+cd backend
+pip install -r requirements.txt
+pip install moviepy
+pip install shazamio
+python createDB.py
+python app.py
+`
+In a second terminal, run from the base directory:
+`
+cd frontend
+npm install
+npm run start
+`
 ## Inspiration
 The world of music seems limitless, and yet sometimes, it feels hard to break free from the monotonous music loop that many of us experience. We often find ourselves stuck in a cycle where attempts to discover new songs lead us back to familiar tunes. TuneTangle aims to solve this by leveraging the viral potential of TikTok and the extensive catalog of Spotify to introduce users to fresh, niche music that aligns with their tastes. By integrating sound recognition and recommendation algorithms, we envisioned a tool that not only surfaces new music but also makes the discovery process enjoyable and seamless.
 
