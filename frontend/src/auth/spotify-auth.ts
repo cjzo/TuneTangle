@@ -1,6 +1,6 @@
 const SPOTIFY_AUTHORIZE_ENDPOINT = 'https://accounts.spotify.com/authorize';
 
-const CLIENT_ID = '5771d5d776964495b21177378f72c035';
+const CLIENT_ID = '4aa9a0494abe407eb2526becdb7e8dd4'; // changed from 5771d5d776964495b21177378f72c035
 const REDIRECT_URI = 'http://localhost:3000/callback';
 
 const RESPONSE_TYPE = 'token';

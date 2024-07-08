@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
-import requests, base64
+import requests, json
+import sqlite3
 from tikapi import TikAPI, ValidationException, ResponseException
 from flask_cors import CORS
 
 app = Flask(__name__)
+DATABASE = 'songs.db'
 
 CORS(app, origins="*")
 
@@ -13,89 +15,229 @@ api = TikAPI(api_key)
 client_id = "4aa9a0494abe407eb2526becdb7e8dd4"
 client_secret = "3fce7b2629824f4abd2ae5954184d64b"
 
-# Gets Auth Token
-def get_token():
+access_token = ""
+
+
+def get_db():
+    conn = sqlite3.connect(DATABASE)
+    return conn
+
+'''
+def get_spotify_access_token(code):
+    # Encode client ID and client secret
     client_creds = f"{client_id}:{client_secret}"
     client_creds_b64 = base64.b64encode(client_creds.encode())
 
+    # Get access token
     token_url = "https://accounts.spotify.com/api/token"
     token_headers = {
         "Authorization": f"Basic {client_creds_b64.decode()}",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": 'application/x-www-form-urlencoded'
     }
     token_data = {
-        "grant_type": "client_credentials"
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect-uri": 'http://localhost:3000/callback'
     }
 
     r = requests.post(token_url, data=token_data, headers=token_headers)
-    token_response_data = r.json()
-    return token_response_data['access_token']
+    if r.status_code != 200:
+        print(f"Error: {r.status_code}, {r.text}")
+    token_response_data = r.json()['access_token']
+    return token_response_data
+'''
 
-@app.route('/recommendations', methods=['POST'])
-def recommendations():
-    song_query = request.json.get('song_query')
-    if not song_query:
-        return jsonify({'error': 'No song query provided'}), 400
-    
-    access_token = get_token()
-
-    # Find track ID
+def get_track_id(track_name):
+    # Find the song's ID
     search_url = "https://api.spotify.com/v1/search"
     search_headers = {
         "Authorization": f"Bearer {access_token}"
     }
     search_params = {
-        "q": song_query,
+        "q": track_name,
         "type": "track",
         "limit": 1
     }
 
     search_response = requests.get(search_url, headers=search_headers, params=search_params)
+    if search_response.status_code != 200:
+        print(f"Error: {search_response.status_code}, {search_response.text}")
     search_json = search_response.json()
-    if not search_json['tracks']['items']:
-        return jsonify({'error': 'No track found'}), 404
-    track_id = search_json['tracks']['items'][0]['id']
 
-    # Get audio features of the track to build a better recommendation
+    return search_json['tracks']['items'][0]['id']
+    
+
+def get_track_features(track_id):
+    # Get audio features of the track to build a better recommendation?
     features_url = f"https://api.spotify.com/v1/audio-features/{track_id}"
-    features_response = requests.get(features_url, headers=search_headers)
-    features = features_response.json()
+    features_header = {
+        "Authorization": f"Bearer {access_token}"
+    }
+    features_response = requests.get(features_url, headers=features_header)
+    return features_response.json()
 
-    bpm = features['tempo']
-    danceability = features['danceability']
-    instrumentalness = features['instrumentalness']
-    liveness = features['liveness']
-    valence = features['valence']
 
+def get_all_of_something(url, params=None):
+    all_songs = []
+    headers = {
+         "Authorization": f"Bearer {access_token}"
+    }
+
+    while url:
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code != 200:
+            print(f"Error: {response.status_code}, {response.text}")
+            break
+
+        song_json = response.json()
+        all_songs.extend(song_json['items'])
+
+        # Update the URL to the next page of results
+        url = song_json.get('next')
+
+        # Clear params after the first request as they should not be used in pagination
+        params = None
+
+    return all_songs
+
+
+def get_playlist_songs():
+    # this gets the current user's id
+    user_url = "https://api.spotify.com/v1/me"
+    user_headers = {"Authorization": f"Bearer {access_token}"}
+    user_response = (requests.get(user_url, headers=user_headers).json())
+    user_id = user_response['id']
+    print(f"User Id is {user_id}")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT song_ids, total_songs FROM user_songs WHERE user_id = ?', (user_id,))
+    result = cursor.fetchone()
+
+    #song_ids holds ids of all songs to be compared to
+    song_ids = []
+
+    # this gets list of all playlists
+    playlist_url = "https://api.spotify.com/v1/me/playlists"
+
+    playlist_json_items = get_all_of_something(playlist_url)
+
+    total_songs = sum(playlist['tracks']['total'] for playlist in playlist_json_items)
+    
+    # If stored song IDs exist and the total number of songs matches, use the stored song IDs
+    if result:
+        stored_song_ids = json.loads(result[0])
+        stored_total_songs = result[1]
+        if stored_total_songs == total_songs:
+            song_ids = stored_song_ids
+            conn.close()
+            return song_ids
+    else:
+        #for each playlist
+        for playlist in playlist_json_items:
+            if user_id == playlist['owner']['id']:
+                print(f"USER ID MATCHES!! {user_id} = {playlist['owner']['id']}")
+                #DELETABLE (TESTING FOR PLAYLIST NAMES)
+                playlist_name_url = f"https://api.spotify.com/v1/playlists/{playlist['id']}"
+                test_headers = {
+                    "Authorization": f"Bearer {access_token}"
+                }
+                test_response = requests.get(playlist_name_url, headers = test_headers)
+                test_json = test_response.json()
+                print(f"Playlist name: {test_json['name']}")
+
+                #gets all songs in that playlist
+
+                track_url = f"https://api.spotify.com/v1/playlists/{playlist['id']}/tracks"
+                song_items = get_all_of_something(track_url)
+
+                #if there is a track id, add to song_ids
+                for item in song_items:
+                    track = item.get('track')
+                    if track and 'id' in track:
+                        song_ids.append(track['id'])
+                        print(f"Just appended {item['track']['id']}")
+
+        #adds all the liked songs as well
+        liked_url = f"https://api.spotify.com/v1/me/tracks"
+        liked_songs = get_all_of_something(liked_url)
+        print("Just looked at liked songs")
+        for item in liked_songs:
+            track = item.get('track')
+            if track and 'id' in track:
+                song_ids.append(item['track']['id'])
+
+        # Store the songs and total song count in the database
+        cursor.execute('''
+            INSERT OR REPLACE INTO user_songs (user_id, song_ids, total_songs)
+            VALUES (?, ?, ?)
+        ''', (user_id, json.dumps(song_ids), total_songs))
+        conn.commit()
+        conn.close()
+        
+        return song_ids
+
+def get_recommendations(track_id, features, songs):
     # Get recommendations
     recommendations_url = "https://api.spotify.com/v1/recommendations"
-
-    # Recommendation headers seemed the same as search headers
+    recommendations_headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
     recommendations_params = {
         "seed_tracks": track_id,
-        "limit": 10,
-        "min_danceability": danceability - .1,
-        "max_danceability": danceability + .1,
-        "min_instrumentalness": instrumentalness - .1,
-        "max_instrumentalness": instrumentalness + .1,
-        "min_liveness": liveness - .1,
-        "max_liveness": liveness + .1,
-        "min_valence": valence - .1,
-        "max_valence": valence + .1,
+        "limit": 20,
+        "min_danceability": features['danceability'] - .1,
+        "max_danceability": features['danceability'] + .1,
+        "min_instrumentalness": features['instrumentalness'] - .1,
+        "max_instrumentalness": features['instrumentalness'] + .1,
+        "min_liveness": features['liveness'] - .1,
+        "max_liveness": features['liveness'] + .1,
+        "min_valence": features['valence'] - .1,
+        "max_valence": features['valence'] + .1,
         "min_popularity": 30
     }
 
-    recommendations_response = requests.get(recommendations_url, headers=search_headers, params=recommendations_params)
+    recommendations_response = requests.get(recommendations_url, headers=recommendations_headers, params=recommendations_params)
     recommendations_json = recommendations_response.json()
 
-    # Store the name and artist of each recommended song
-    full_info = []
+
+    # full_info will store the name and artist of each recommended song
+    # Store the name and artist of each recommended song    
+
+    recommendations = []
     for track in recommendations_json['tracks']:
-        full_info.append(f"{track['name']} {track['artists'][0]['name']}")
+        if (not (track['id'] in songs)):
+            recommendations.append(f"{track['name']} - {track['artists'][0]['name']}")
+            print(f"{track['name']} - {track['artists'][0]['name']} has not been found in any of the recommendations")
+        else:
+            print(f"Just found {track['name']} - {track['artists'][0]['name']} as a match")
+
+    return recommendations
+
+@app.route('/recommendations', methods=['POST'])
+def recommend():
+    print("RAHHH")
+    track_name = request.json.get('song_query')
+    if not track_name:
+        return jsonify({"error": "track_name parameter is required"}), 400
     
+    #code = request.json.get('code')
+    #if code is None:
+    #    return jsonify({"error": "No code provided"}), 400
+    #else:
+    #    print("code is ", code)
+    global access_token
+    access_token = request.json.get('code')
+    #access_token = get_spotify_access_token(code)
+    track_id = get_track_id(track_name)
+    features = get_track_features(track_id)
+    songs = get_playlist_songs()
+    recommendations = get_recommendations(track_id, features, songs)
+
+
     # Get TikToks for each song
     video_list = []
-    for info in full_info:
+    for info in recommendations:
         url = f"https://api.tikapi.io/public/search/videos?query={info}"
         headers = {
             'X-API-KEY': api_key
@@ -137,6 +279,37 @@ def recommendations():
             })
 
     return jsonify(video_list)
+
+
+@app.route('/add-liked', methods=['POST'])
+def add_to_liked():
+    track_name = request.json.get('liked_song')
+    if not track_name:
+        return jsonify({"error": "track_name parameter is required"}), 400
+    
+    track_id = get_track_id(track_name)
+    liked_url = "https://api.spotify.com/v1/me/tracks"
+    liked_headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": 'application/json'
+    }
+    liked_data = {
+        "ids":[track_id]
+    }
+
+    response = requests.put(liked_url, headers=liked_headers, json=liked_data)
+
+    liked_song_added = True
+
+    if response.status_code != 200:
+        liked_song_added = False
+
+    return jsonify({'liked-song-added': liked_song_added})
+
+
+@app.route('/')
+def hello():
+    return ("Hello World")
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
