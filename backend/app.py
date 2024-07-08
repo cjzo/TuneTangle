@@ -14,7 +14,7 @@ DATABASE = 'songs.db'
 
 CORS(app, origins="*")
 
-api_key = "h2wTZFgQ1NYWTF586HMsL4tXgL93T1XDcq7yGjorLAc4Q48L"
+api_key = "dO1Hw8eZ5ZensleTzk80MNPih7VYYUdm71Df5NUmUxpMw9cl"
 api = TikAPI(api_key)
 
 client_id = "4aa9a0494abe407eb2526becdb7e8dd4"

@@ -252,7 +252,7 @@ const Recommendations = () => {
                                 OR
                             </Text>
                             <Input id="file-upload" type="file" onChange={handleFileUpload} ref={fileInputRef} style={{ display: 'none' }} size="xs"/>
-                            <Button onClick={handleUploadButton}>Upload Song</Button>
+                            <Button onClick={handleUploadButton}>Upload Video</Button>
                             <Button onClick={handleSubmit} className="main-button" size="lg" height="4rem" px="2rem">
                                 Get Recommendations
                             </Button>

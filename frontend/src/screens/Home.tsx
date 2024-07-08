@@ -64,7 +64,7 @@ function Home() {
                 bgClip="text"
                 data-aos="fade-up"
               >
-                Sound Search
+                Tune Tangle
               </Heading>
               <Text
                 fontSize={["lg", "xl"]}
