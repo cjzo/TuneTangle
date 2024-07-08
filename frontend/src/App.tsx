@@ -44,7 +44,7 @@ const App: React.FC = () => {
         </Heading>
 
         <HStack spacing={5}>
-          <Box className="SearchContainer">
+          {/* <Box className="SearchContainer">
             <InputGroup>
               <InputRightElement pointerEvents="none">
                 <Image src={Search} alt="Search Icon" width="18px" height="18px" />
@@ -59,7 +59,7 @@ const App: React.FC = () => {
                 className="searchInput"
               />
             </InputGroup>
-          </Box>
+          </Box> */}
           <ButtonGroup spacing={5}>
             <LoginButton></LoginButton>
           </ButtonGroup>
