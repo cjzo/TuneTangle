@@ -2,6 +2,7 @@
 Want to break out of the monotonous loop of music that you can't seem to escape? Look no further! **TuneTangle gives you a curated playlist based on your existing taste to spice your music life up!**
 
 ## Setup
+On Windows:
 ```
 cd backend
 
@@ -14,6 +15,12 @@ pip install shazamio
 python createDB.py
 
 python app.py
+```
+On Mac, the last two lines would instead be:
+```
+python3 createDB.py
+
+python3 app.py
 ```
 In a second terminal, run from the base directory:
 ```
