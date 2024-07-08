@@ -35,6 +35,12 @@ function LoggedInHome() {
         };
     }, []);
 
+    let username = localStorage.getItem('user_name');
+
+    if (!username) {
+        username = "you have been logged in"
+    }
+
     return (
         <Box display="flex" flexDirection="column" minHeight="90vh" overflow="hidden">
             <Box as="section" flex="1" overflow="hidden" p={4} pos="relative" display="flex" flexDirection="column">
@@ -77,7 +83,7 @@ function LoggedInHome() {
                                 className="text-shadow"
                                 minHeight={["60px", "80px", "100px"]}
                             >
-                                You've now logged in.
+                                Welcome, you have been logged in!
                             </Text>
                             <Text
                                 fontSize={["lg", "2xl"]}

@@ -166,6 +166,11 @@ const Recommendations = () => {
               <Input
                 value={songQuery}
                 onChange={handleInputChange}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    getRecommendations();
+                  }
+                }}
                 placeholder="Enter song name"
                 size="lg"
                 mt={5}
