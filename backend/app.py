@@ -41,8 +41,6 @@ def get_spotify_access_token(code):
     }
 
     r = requests.post(token_url, data=token_data, headers=token_headers)
-    if r.status_code != 200:
-        print(f"Error: {r.status_code}, {r.text}")
     token_response_data = r.json()['access_token']
     return token_response_data
 '''
@@ -60,8 +58,6 @@ def get_track_id(track_name):
     }
 
     search_response = requests.get(search_url, headers=search_headers, params=search_params)
-    if search_response.status_code != 200:
-        print(f"Error: {search_response.status_code}, {search_response.text}")
     search_json = search_response.json()
 
     return search_json['tracks']['items'][0]['id']
@@ -85,9 +81,6 @@ def get_all_of_something(url, params=None):
 
     while url:
         response = requests.get(url, headers=headers, params=params)
-        if response.status_code != 200:
-            print(f"Error: {response.status_code}, {response.text}")
-            break
 
         song_json = response.json()
         all_songs.extend(song_json['items'])
@@ -107,7 +100,6 @@ def get_playlist_songs():
     user_headers = {"Authorization": f"Bearer {access_token}"}
     user_response = (requests.get(user_url, headers=user_headers).json())
     user_id = user_response['id']
-    print(f"User Id is {user_id}")
 
     conn = get_db()
     cursor = conn.cursor()
@@ -136,16 +128,6 @@ def get_playlist_songs():
         #for each playlist
         for playlist in playlist_json_items:
             if user_id == playlist['owner']['id']:
-                print(f"USER ID MATCHES!! {user_id} = {playlist['owner']['id']}")
-                #DELETABLE (TESTING FOR PLAYLIST NAMES)
-                playlist_name_url = f"https://api.spotify.com/v1/playlists/{playlist['id']}"
-                test_headers = {
-                    "Authorization": f"Bearer {access_token}"
-                }
-                test_response = requests.get(playlist_name_url, headers = test_headers)
-                test_json = test_response.json()
-                print(f"Playlist name: {test_json['name']}")
-
                 #gets all songs in that playlist
 
                 track_url = f"https://api.spotify.com/v1/playlists/{playlist['id']}/tracks"
@@ -156,12 +138,10 @@ def get_playlist_songs():
                     track = item.get('track')
                     if track and 'id' in track:
                         song_ids.append(track['id'])
-                        print(f"Just appended {item['track']['id']}")
 
         #adds all the liked songs as well
         liked_url = f"https://api.spotify.com/v1/me/tracks"
         liked_songs = get_all_of_something(liked_url)
-        print("Just looked at liked songs")
         for item in liked_songs:
             track = item.get('track')
             if track and 'id' in track:
@@ -208,24 +188,15 @@ def get_recommendations(track_id, features, songs):
     for track in recommendations_json['tracks']:
         if (not (track['id'] in songs)):
             recommendations.append(f"{track['name']} - {track['artists'][0]['name']}")
-            print(f"{track['name']} - {track['artists'][0]['name']} has not been found in any of the recommendations")
-        else:
-            print(f"Just found {track['name']} - {track['artists'][0]['name']} as a match")
 
     return recommendations
 
 @app.route('/recommendations', methods=['POST'])
 def recommend():
-    print("RAHHH")
     track_name = request.json.get('song_query')
     if not track_name:
         return jsonify({"error": "track_name parameter is required"}), 400
     
-    #code = request.json.get('code')
-    #if code is None:
-    #    return jsonify({"error": "No code provided"}), 400
-    #else:
-    #    print("code is ", code)
     global access_token
     access_token = request.json.get('code')
     #access_token = get_spotify_access_token(code)
