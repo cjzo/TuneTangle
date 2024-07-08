@@ -14,7 +14,6 @@ import {
 } from "@chakra-ui/react";
 import { motion } from 'framer-motion';
 import '../App.css';
-import { get } from 'http';
 
 interface Result {
     track: string;
@@ -50,6 +49,13 @@ const Recommendations = () => {
     const getRecommendations = async (query = songQuery) => {
         if(loading) return;
         setLoading(true);
+        const code = localStorage.getItem('spotify_access_token');
+        if (!code) {
+            setError('Please log in to Spotify to get recommendations.');
+            setResults([]);
+            setLoading(false);
+            return;
+        }
         try {
             const response = await fetch('/recommendations', {
                 method: 'POST',
@@ -57,7 +63,8 @@ const Recommendations = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    song_query: query
+                    song_query: query,
+                    code: code
                 })
             });
     
