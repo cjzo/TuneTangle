@@ -2,12 +2,17 @@ from flask import Flask, request, jsonify
 import requests, base64
 from tikapi import TikAPI, ValidationException, ResponseException
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
+from moviepy.editor import VideoFileClip
+from shazamio import Shazam
+import asyncio
+import os
 
 app = Flask(__name__)
 
 CORS(app, origins="*")
 
-api_key = "7vOXGqdh1XKBfTblPXFnfENarTsjh4hA3ZUaVFVdwj6dX5gH"
+api_key = "h2wTZFgQ1NYWTF586HMsL4tXgL93T1XDcq7yGjorLAc4Q48L"
 api = TikAPI(api_key)
 
 client_id = "4aa9a0494abe407eb2526becdb7e8dd4"
@@ -137,6 +142,51 @@ def recommendations():
             })
 
     return jsonify(video_list)
+
+def get_song_name(response):
+    if not response['matches']:
+        return 'No matches found'
+    else:
+        song_name = response['track']['title']
+        artist_name = response['track']['subtitle']
+        return f'{song_name} - {artist_name}'
+
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'videofile') 
+loop = asyncio.get_event_loop()
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return 'No file part in the request.', 400
+    file = request.files['file']
+    if file.filename == '':
+        return 'No selected file.', 400
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(file_path)
+
+    video = VideoFileClip(file_path)
+    audio = video.audio
+    audio_filename = os.path.splitext(filename)[0] + '.mp3'
+    audio_path = os.path.join(UPLOAD_FOLDER, audio_filename)
+    audio.write_audiofile(audio_path)
+    video.close()
+    audio.close()
+
+    async def recognize_song():
+        shazam = Shazam()
+        out = await shazam.recognize(audio_path)
+        return out
+
+    song_info = get_song_name(loop.run_until_complete(recognize_song()))
+
+    os.remove(file_path)
+    os.remove(audio_path)
+    print(song_info)
+    if song_info == 'No matches found':
+        return jsonify({'message': song_info}), 404
+    else:
+        return jsonify({'message': song_info}), 200
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)

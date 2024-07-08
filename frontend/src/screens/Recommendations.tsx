@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Box,
     Button,
@@ -14,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from 'framer-motion';
 import '../App.css';
+import { get } from 'http';
 
 interface Result {
     track: string;
@@ -28,6 +29,7 @@ const Recommendations = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [embeds, setEmbeds] = useState<{ [key: number]: string }>({});
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -45,7 +47,8 @@ const Recommendations = () => {
         setSongQuery(e.target.value);
     };
 
-    const getRecommendations = async () => {
+    const getRecommendations = async (query = songQuery) => {
+        if(loading) return;
         setLoading(true);
         try {
             const response = await fetch('/recommendations', {
@@ -54,12 +57,12 @@ const Recommendations = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    song_query: songQuery
+                    song_query: query
                 })
             });
-
+    
             const data = await response.json();
-
+    
             if (data.error) {
                 setError(data.error);
                 setResults([]);
@@ -98,6 +101,93 @@ const Recommendations = () => {
         };
     }, [embeds]);
 
+    const handleFileUpload = async (event: any) => {
+        if (event.target.files.length === 0) {
+            console.log("No file selected")
+            return;
+        }
+        const file = event.target.files[0];
+        if(!isVideo(file.name)){
+          setError('Invalid file type. Please upload a video file.');
+          return;
+        }
+        setLoading(true);
+        setSongQuery('');
+        setError('')
+        let query = ''
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+          const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData,
+          });
+      
+          if (response.status === 404) {
+            throw new Error('No song detected.');
+          }
+          else if (!response.ok) {
+            throw new Error('A file upload error occured');
+          }
+      
+          // Process server's response here
+          const data = await response.json();
+          console.log(data.message);
+          setSongQuery(data.message);
+          query = data.message;
+        } catch (error: any) {
+          setError(error.message);
+          console.error('Error:', error.message);
+        }
+        event.target.value = null;
+        if(query !== '') {
+            getRecommendations(query);
+        }
+        else{
+            setLoading(false)
+        }
+      };
+
+    const handleUploadButton = () => {
+        fileInputRef.current?.click();
+    };
+
+    function isVideo(filename: string) {
+        const parts = filename.split('.');
+        const ext = parts[parts.length - 1];
+        switch (ext.toLowerCase()) {
+          case 'mp4':
+          case 'mov': //can add more video extensions
+            return true;
+        }
+        return false;
+      }
+
+    const handleAddToLikeButton = async (track: string) => {
+        try {
+            const response = await fetch('/add-liked', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'like_song': track
+                })
+            });
+            if (!response.ok) {
+                throw new Error('An error occurred while adding song to liked songs.');
+            }
+            const data = await response.json();
+            console.log(data);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    const handleSubmit = () => {
+        getRecommendations();
+    }
+
     return (
         <Box display="flex" flexDirection="column" minHeight="90vh" overflow="hidden">
             <Box as="section" flex="1" overflow="hidden" p={4} pos="relative" display="flex" flexDirection="column">
@@ -130,7 +220,6 @@ const Recommendations = () => {
                                 Music Recommendations
                             </Heading>
                             <Input
-                                value={songQuery}
                                 onChange={handleInputChange}
                                 onKeyDown={event => {
                                     if (event.key === 'Enter') {
@@ -143,7 +232,21 @@ const Recommendations = () => {
                                 mb={1}
                                 className="searchbar"
                             />
-                            <Button onClick={getRecommendations} className="main-button" size="lg" height="4rem" px="2rem">
+                            <Text
+                                fontSize={["lg", "2xl"]}
+                                maxW="800px"
+                                textAlign="center"
+                                data-aos="fade-up"
+                                data-aos-delay="100"
+                                mt={1}
+                                mb={4}
+                                fontWeight="bold"
+                                className="text-shadow">
+                                OR
+                            </Text>
+                            <Input id="file-upload" type="file" onChange={handleFileUpload} ref={fileInputRef} style={{ display: 'none' }} size="xs"/>
+                            <Button onClick={handleUploadButton}>Upload Song</Button>
+                            <Button onClick={handleSubmit} className="main-button" size="lg" height="4rem" px="2rem">
                                 Get Recommendations
                             </Button>
                             {error && <Text color="red.500">{error}</Text>}
@@ -169,6 +272,9 @@ const Recommendations = () => {
                                                         </CardBody>
                                                         <CardFooter>
                                                             <Text as="span" fontWeight="bold">{result.track}</Text>
+                                                            <Button onClick={() => handleAddToLikeButton(result.track)} size="sm" ml={2}>
+                                                                Add to Liked Songs
+                                                            </Button>
                                                         </CardFooter>
                                                     </>
                                                 )}
