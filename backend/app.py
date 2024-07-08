@@ -275,7 +275,7 @@ def add_to_liked():
     if response.status_code != 200:
         liked_song_added = False
 
-    return jsonify({'liked-song-added': liked_song_added})
+    return jsonify({'liked_song_added': liked_song_added})
 
 
 @app.route('/')
