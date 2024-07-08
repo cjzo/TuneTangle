@@ -11,9 +11,12 @@ import {
     CardBody,
     CardFooter,
     Spinner,
+    Image,
+    Divider
 } from "@chakra-ui/react";
 import { motion } from 'framer-motion';
 import '../App.css';
+import Upload from '../media/upload.png';
 
 interface Result {
     track: string;
@@ -237,7 +240,7 @@ const Recommendations = () => {
                                 size="lg"
                                 mt={5}
                                 mb={1}
-                                className="searchbar"
+                                className="searchbar-main"
                             />
                             <Text
                                 fontSize={["lg", "2xl"]}
@@ -245,14 +248,25 @@ const Recommendations = () => {
                                 textAlign="center"
                                 data-aos="fade-up"
                                 data-aos-delay="100"
-                                mt={1}
-                                mb={4}
+                                mt={0}
+                                mb={0}
                                 fontWeight="bold"
                                 className="text-shadow">
                                 OR
                             </Text>
                             <Input id="file-upload" type="file" onChange={handleFileUpload} ref={fileInputRef} style={{ display: 'none' }} size="xs"/>
-                            <Button onClick={handleUploadButton}>Upload Video</Button>
+                            <Button className="alt-button" onClick={handleUploadButton}>
+                                <Box pr={4}>
+                                    <Image
+                                        src={Upload}
+                                        height="25px"
+                                    />
+                                </Box>
+                                <Text>
+                                        Upload Video
+                                </Text>
+                            </Button>
+                            <Divider w="70%" mx="auto"/>
                             <Button onClick={handleSubmit} className="main-button" size="lg" height="4rem" px="2rem">
                                 Get Recommendations
                             </Button>
@@ -279,7 +293,7 @@ const Recommendations = () => {
                                                         </CardBody>
                                                         <CardFooter>
                                                             <Text as="span" fontWeight="bold">{result.track}</Text>
-                                                            <Button onClick={() => handleAddToLikeButton(result.track)} size="sm" ml={2}>
+                                                            <Button onClick={() => handleAddToLikeButton(result.track)} className="alt-button" size="sm" ml={2}>
                                                                 Add to Liked Songs
                                                             </Button>
                                                         </CardFooter>

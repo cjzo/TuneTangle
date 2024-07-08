@@ -73,7 +73,7 @@ const components = {
   },
   Input: {
     defaultProps: {
-      focusBorderColor: "blue.200",
+      focusBorderColor: "#40444D",
     },
   },
   Popover: {
