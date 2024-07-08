@@ -8,12 +8,12 @@ import {
   Flex,
   Text,
   Heading,
-  Input,
-  InputGroup,
-  InputRightElement
+  // Input,
+  // InputGroup,
+  // InputRightElement
 } from "@chakra-ui/react";
 import Logo from './media/TikTok-logo.png';
-import Search from './media/search.png';
+// import Search from './media/search.png';
 import Home from './screens/Home';
 import { Link, Route, Routes } from "react-router-dom";
 

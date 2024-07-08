@@ -178,7 +178,7 @@ const Recommendations = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    'like_song': track
+                    'liked_song': track
                 })
             });
             if (!response.ok) {

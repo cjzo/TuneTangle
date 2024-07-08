@@ -88,7 +88,8 @@ def get_all_of_something(url, params=None):
         response = requests.get(url, headers=headers, params=params)
 
         song_json = response.json()
-        all_songs.extend(song_json['items'])
+        if 'items' in song_json:
+            all_songs.extend(song_json['items'])
 
         # Update the URL to the next page of results
         url = song_json.get('next')
@@ -201,7 +202,7 @@ def recommend():
     track_name = request.json.get('song_query')
     if not track_name:
         return jsonify({"error": "track_name parameter is required"}), 400
-    
+    print(track_name)
     global access_token
     access_token = request.json.get('code')
     #access_token = get_spotify_access_token(code)
@@ -303,28 +304,33 @@ def upload_file():
 
 @app.route('/add-liked', methods=['POST'])
 def add_to_liked():
-    track_name = request.json.get('liked_song')
-    if not track_name:
-        return jsonify({"error": "track_name parameter is required"}), 400
-    
-    track_id = get_track_id(track_name)
-    liked_url = "https://api.spotify.com/v1/me/tracks"
-    liked_headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": 'application/json'
-    }
-    liked_data = {
-        "ids":[track_id]
-    }
+    try:
+        track_name = request.json.get('liked_song')
+        if not track_name:
+            return jsonify({"error": "track_name parameter is required"}), 400
+        
+        track_id = get_track_id(track_name)
+        liked_url = "https://api.spotify.com/v1/me/tracks"
+        liked_headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": 'application/json'
+        }
+        liked_data = {
+            "ids":[track_id]
+        }
 
-    response = requests.put(liked_url, headers=liked_headers, json=liked_data)
+        response = requests.put(liked_url, headers=liked_headers, json=liked_data)
 
-    liked_song_added = True
+        liked_song_added = True
 
-    if response.status_code != 200:
-        liked_song_added = False
+        if response.status_code != 200:
+            print('res '+ json.dumps(response.json()))
+            liked_song_added = False
 
-    return jsonify({'liked_song_added': liked_song_added})
+        return jsonify({'liked_song_added': liked_song_added})
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/')
