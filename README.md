@@ -1,6 +1,9 @@
 ## TuneTangle
 Want to break out of the monotonous loop of music that you can't seem to escape? Look no further! **TuneTangle gives you a curated playlist based on your existing taste to spice your music life up!**
 
+## Demo
+[Link to Video](https://www.youtube.com/watch?v=vHNyjKSygag)
+
 ## Setup
 On Windows:
 ```
