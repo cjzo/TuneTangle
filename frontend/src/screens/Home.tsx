@@ -78,7 +78,7 @@ function Home() {
                 minHeight={["60px", "80px", "100px"]}
               >
                 Unleash a universe of fresh beats, tracks, and trends. Using
-                your favorite tunes to guide us, Sound Search unearths hidden
+                your favorite tunes to guide us, Tune Tangle unearths hidden
                 gems and underground songs you'll love through Spotify and TikTok.
               </Text>
               <Text

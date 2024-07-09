@@ -12,7 +12,8 @@ import {
     CardFooter,
     Spinner,
     Image,
-    Divider
+    Divider,
+    useToast
 } from "@chakra-ui/react";
 import { motion } from 'framer-motion';
 import '../App.css';
@@ -32,6 +33,7 @@ const Recommendations = () => {
     const [loading, setLoading] = useState(false);
     const [embeds, setEmbeds] = useState<{ [key: number]: string }>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const toast = useToast();
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -59,6 +61,7 @@ const Recommendations = () => {
             setLoading(false);
             return;
         }
+        setError('')
         try {
             const response = await fetch('/recommendations', {
                 method: 'POST',
@@ -173,7 +176,8 @@ const Recommendations = () => {
         return false;
       }
 
-    const handleAddToLikeButton = async (track: string) => {
+      const handleAddToLikeButton = async (track: string) => {
+    
         try {
             const response = await fetch('/add-liked', {
                 method: 'POST',
@@ -188,9 +192,33 @@ const Recommendations = () => {
                 throw new Error('An error occurred while adding song to liked songs.');
             }
             const data = await response.json();
-            console.log(data);
+            if(data.liked_song_added){
+                toast({
+                    title: "Success",
+                    description: "Song has been added to liked songs.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+            else{
+                toast({
+                    title: "Error",
+                    description: "Song could not be added to liked songs.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
         } catch (err) {
             console.error(err);
+            toast({
+                title: "Error",
+                description: "An error occurred while adding song to liked songs.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
         }
     }
 
@@ -230,6 +258,7 @@ const Recommendations = () => {
                                 Music Recommendations
                             </Heading>
                             <Input
+                                value={songQuery}
                                 onChange={handleInputChange}
                                 onKeyDown={event => {
                                     if (event.key === 'Enter') {

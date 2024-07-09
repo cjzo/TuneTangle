@@ -14,7 +14,7 @@ DATABASE = 'songs.db'
 
 CORS(app, origins="*")
 
-api_key = "dO1Hw8eZ5ZensleTzk80MNPih7VYYUdm71Df5NUmUxpMw9cl"
+api_key = "SOQtRmU3RNvyt8Fqv41FwxbiuhO4ed447mey4ZWm409vgtFi"
 api = TikAPI(api_key)
 
 client_id = "4aa9a0494abe407eb2526becdb7e8dd4"
@@ -64,8 +64,11 @@ def get_track_id(track_name):
 
     search_response = requests.get(search_url, headers=search_headers, params=search_params)
     search_json = search_response.json()
-
-    return search_json['tracks']['items'][0]['id']
+    try:
+        return search_json['tracks']['items'][0]['id']
+    except Exception as e: # Error if the api key is expired
+        print(search_json)
+        return jsonify({'error': str(e)}), 500
     
 
 def get_track_features(track_id):
@@ -201,7 +204,7 @@ def get_recommendations(track_id, features, songs):
 def recommend():
     track_name = request.json.get('song_query')
     if not track_name:
-        return jsonify({"error": "track_name parameter is required"}), 400
+        return jsonify({"error": "Song required"}), 400
     print(track_name)
     global access_token
     access_token = request.json.get('code')
@@ -214,15 +217,17 @@ def recommend():
 
     # Get TikToks for each song
     video_list = []
+    headers = {
+    'X-API-KEY': api_key
+    }
     for info in recommendations:
         url = f"https://api.tikapi.io/public/search/videos?query={info}"
-        headers = {
-            'X-API-KEY': api_key
-        }
-        response = requests.get(url, headers=headers)
-
-        changeable = response.json()
-
+        try:
+            response = requests.get(url, headers=headers)
+            changeable = response.json()
+        except Exception as e:
+            print(response.text)
+            return jsonify({'error': str(e)}), 500
         # Check if 'item_list' key exists
         if "item_list" in changeable and changeable["item_list"]:
             try:
