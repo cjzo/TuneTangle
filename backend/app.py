@@ -227,7 +227,7 @@ def recommend():
             changeable = response.json()
         except Exception as e:
             print(response.text)
-            return jsonify({'error': str(e)}), 500
+            return jsonify({'error': "Error with TikAPI"}), 500
         # Check if 'item_list' key exists
         if "item_list" in changeable and changeable["item_list"]:
             try:
