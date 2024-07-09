@@ -11,7 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import { motion } from 'framer-motion';
 import Spotify from '../media/spotify.png';
-
+import { useNavigate } from 'react-router-dom';
 import { getSpotifyAuthUrl } from '../auth/spotify-auth';
 
 import '../App.css';
@@ -22,6 +22,15 @@ function Home() {
   };
 
   const [cursorPosition, setCursorPosition] = useState({ x: -100, y: -100 });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      const token = localStorage.getItem('spotify_access_token');
+      if (token) {
+          navigate('/LoggedInHome');
+      }
+  }, [navigate]);
+
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -80,6 +89,7 @@ function Home() {
                 Unleash a universe of fresh beats, tracks, and trends. Using
                 your favorite tunes to guide us, Tune Tangle unearths hidden
                 gems and underground songs you'll love through Spotify and TikTok.
+                Just for you.
               </Text>
               <Text
                 fontSize={["lg", "2xl"]}

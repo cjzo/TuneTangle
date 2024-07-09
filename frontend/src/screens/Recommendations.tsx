@@ -18,6 +18,7 @@ import {
 import { motion } from 'framer-motion';
 import '../App.css';
 import Upload from '../media/upload.png';
+import Search from '../media/search.png';
 
 interface Result {
     track: string;
@@ -297,7 +298,15 @@ const Recommendations = () => {
                             </Button>
                             <Divider w="70%" mx="auto"/>
                             <Button onClick={handleSubmit} className="main-button" size="lg" height="4rem" px="2rem">
-                                Get Recommendations
+                            <Box pr={4}>
+                                    <Image
+                                        src={Search}
+                                        height="25px"
+                                    />
+                                </Box>
+                                <Text>
+                                        Get Recommendations
+                                </Text>
                             </Button>
                             {error && <Text color="red.500">{error}</Text>}
                             <Box className="results" mt={5} textAlign="center">
