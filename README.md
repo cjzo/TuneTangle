@@ -88,6 +88,6 @@ In addition, creating a complete user experience is something that we never prio
 
 We all know the AI buzzword has been flying around the tech space a little too loosely in the modern day. However, we truly believe that utilizing AI in our music recommendation systems can lead to more tailored results that is better than whatever is behind the Spotify API. Perhaps aggregating information that TikTok has aggregated on user music privileges could be helpful as it allows for an analysis of key moments of virality of songs (for example a catchy hook or a funny line) and predict what songs would appeal to audiences sooner. 
 
-Additionally, integrating into the TikTok platform would allow for a much more streamlined experience for users, allowing them to perhaps press a Share->See Similar Songs button instead of having to go to a website and search for songs or download it to their local device to share.
+Additionally, integrating into the TikTok platform would allow for a much more streamlined experience for users, allowing them to perhaps press a Share->See Similar Songs button instead of having to go to a website and search for songs or download it to their local device to share. We could even expand this to encompass artists themselves. For example artists could have a dashboard which lets them know their songs' performance, clues them into potential collaborations, and provides them hashtags they can use to boost interaction.
 
 All in all, the possibilities for TuneTangle are **endless**, and we are excited to push the possibilities of Artist Discovery!
