@@ -1,4 +1,4 @@
-## TuneTangle
+## TuneTangle (Winner of TikTok TechJam 2024)
 Want to break out of the monotonous loop of music that you can't seem to escape? Look no further! **TuneTangle gives you a curated playlist based on your existing taste to spice your music life up!**
 
 ## Demo
